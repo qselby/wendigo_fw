@@ -19,7 +19,9 @@ MCU    = attiny3227
 F_CPU  = 3333333UL
 
 TARGET = blinky
-SRC    = main.c
+SRC    = src/main.c \
+         src/spi.c
+OBJS   = $(SRC:.c=.o)
 
 # --- Toolchain -----------------------------------------------------------
 CC      = avr-gcc
@@ -29,7 +31,8 @@ AVRDUDE = avrdude
 
 CFLAGS  = -mmcu=$(MCU) -DF_CPU=$(F_CPU) \
           -Os -std=c11 -Wall -Wextra \
-          -ffunction-sections -fdata-sections
+          -ffunction-sections -fdata-sections \
+          -Iinc
 LDFLAGS = -mmcu=$(MCU) -Wl,--gc-sections
 
 # --- Programmer ----------------------------------------------------------
@@ -43,9 +46,13 @@ PORT       = usb
 
 all: $(TARGET).hex
 
-# Compile
-$(TARGET).elf: $(SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+# Compile each source file to an object
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Link
+$(TARGET).elf: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
 
 # Convert to Intel HEX
 $(TARGET).hex: $(TARGET).elf
@@ -62,4 +69,4 @@ flash: $(TARGET).hex
 #   Copy blinky.hex to the CURIOSITY drive that appears when you plug in the board.
 
 clean:
-	rm -f $(TARGET).elf $(TARGET).hex
+	rm -f $(TARGET).elf $(TARGET).hex $(OBJS)
