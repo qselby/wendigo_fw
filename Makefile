@@ -20,7 +20,8 @@ F_CPU  = 3333333UL
 
 TARGET = blinky
 SRC    = src/main.c \
-         src/spi.c
+         src/spi.c \
+         src/dogs164.c
 OBJS   = $(SRC:.c=.o)
 
 # --- Toolchain -----------------------------------------------------------
