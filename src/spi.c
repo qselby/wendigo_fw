@@ -75,7 +75,7 @@ void spi_init(spi_mode_t mode, spi_clk_t clk)
      *                    LSB-first peripherals).
      *    SPI_ENABLE_bm — Power on the peripheral.
      */
-    SPI0.CTRLA = SPI_MASTER_bm | (uint8_t)clk | SPI_ENABLE_bm;
+    SPI0.CTRLA = SPI_MASTER_bm | (uint8_t)clk | SPI_ENABLE_bm | SPI_DORD_bm;
 }
 
 /* =========================================================================

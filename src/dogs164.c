@@ -18,8 +18,8 @@
  *   bit  0   = 0      (always 0)
  * ========================================================================= */
 
-#define SYNC_CMD   0xF8u   /**< RS=0, RW=0 — write to instruction register */
-#define SYNC_DATA  0xFAu   /**< RS=1, RW=0 — write to data register        */
+#define SYNC_CMD   0x1Fu   /**< RS=0, RW=0 — write to instruction register (LSB-first transmit mode)*/
+#define SYNC_DATA  0x5Fu   /**< RS=1, RW=0 — write to data register (LSB-first transmit mode       */
 
 /* =========================================================================
  * DDRAM row base addresses
@@ -52,8 +52,9 @@ static const uint8_t ROM_SEL_BYTE[3] = { 0x00u, 0x04u, 0x0Cu };
 static inline void ssd1803_send(uint8_t sync, uint8_t byte)
 {
     spi_write(sync);
-    spi_write(byte & 0xF0u);           /* upper nibble → bits 7:4, bits 3:0 = 0 */
-    spi_write((uint8_t)(byte << 4u));  /* lower nibble → bits 7:4, bits 3:0 = 0 */
+    // Masks for LSB-first transmission
+    spi_write((uint8_t)(byte & 0x0Fu));  /* lower nibble → bits 7:4, bits 3:0 = 0 */
+    spi_write(byte >> 4u);           /* upper nibble → bits 7:4, bits 3:0 = 0 */
 }
 
 /** @brief Assert CS, send a command byte, deassert CS. */
