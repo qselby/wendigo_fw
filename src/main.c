@@ -48,7 +48,6 @@ int main(void)
     while (1) {
         LED_PORT.OUTTGL = LED_PIN;
         _delay_ms(500);
-        dogs164_set_cursor(&lcd, 3, 0);
-        dogs164_write_str(&lcd, "LINE FOUR       ");
+        dogs164_read_partid(&lcd);
     }
 }

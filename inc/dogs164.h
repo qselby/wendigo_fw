@@ -132,6 +132,8 @@ typedef struct {
  */
 void dogs164_init(dogs164_t *dev, spi_cs_t cs, dogs164_view_t view);
 
+uint8_t dogs164_read_partid(dogs164_t *dev);
+
 /* =========================================================================
  * Display control
  * ========================================================================= */

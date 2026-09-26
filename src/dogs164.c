@@ -57,6 +57,21 @@ static inline void ssd1803_send(uint8_t sync, uint8_t byte)
     spi_write(byte >> 4u);           /* upper nibble → bits 7:4, bits 3:0 = 0 */
 }
 
+/**
+ * @brief Receive one payload byte using the SSD1803A 3-byte serial protocol.
+ *
+ * CS must already be asserted by the caller; it is not touched here.
+ * The controller samples MOSI on the falling SCK edge (Mode 3), which the
+ * SPI peripheral handles automatically.
+ *
+ * @param sync  SYNC_CMD (0xF8) or SYNC_DATA (0xFA).
+ */
+static inline uint8_t ssd1803_read(uint8_t sync)
+{
+    spi_write(sync);
+    return (uint8_t) spi_read();
+}
+
 /** @brief Assert CS, send a command byte, deassert CS. */
 static void write_cmd(dogs164_t *dev, uint8_t cmd)
 {
@@ -127,14 +142,14 @@ void dogs164_init(dogs164_t *dev, spi_cs_t cs, dogs164_view_t view)
      *   0x6C = Follower Control: FON=1 (follower on), RAB=100
      *   The follower requires up to 200 ms to reach steady-state output.
      *   Powering the booster before this delay causes contrast instability. */
-    write_cmd(dev, 0x6Eu);
+    write_cmd(dev, 0x6Cu);
     _delay_ms(200);
 
     /* Step 5: Enable booster and set default contrast (C5:C0 = 42 = 0b101010).
      *   0x56 = Power/Icon/Contrast: Bon=1, Ion=0, C5=1, C4=0
      *   0x7A = Contrast Set:        C3=1,  C2=0,  C1=1, C0=0               */
-    write_cmd(dev, 0x57u);
-    write_cmd(dev, 0x72u);
+    write_cmd(dev, 0x56u);
+    write_cmd(dev, 0x7Au);
 
     /* Step 6: Return to base instruction set and turn the display on.
      *   0x38 = Function Set: RE=0, IS=0
@@ -150,6 +165,17 @@ void dogs164_init(dogs164_t *dev, spi_cs_t cs, dogs164_view_t view)
     dogs164_clear(dev);
 }
 
+/* ------------------------------------------------------------------------- */
+
+uint8_t dogs164_read_partid(dogs164_t *dev)
+{
+    uint8_t result;
+    spi_select(dev->cs);
+    ssd1803_read(0x3Fu);
+    result = ssd1803_read(0x3Fu);
+    spi_deselect(dev->cs);
+    return result;
+}
 /* ------------------------------------------------------------------------- */
 
 void dogs164_clear(dogs164_t *dev)

@@ -123,7 +123,7 @@ void spi_write(uint8_t data)
 
 uint8_t spi_read(void)
 {
-    return spi_transfer(0xFF);  /* Clock out a benign idle byte */
+    return spi_transfer(0x00);  /* Clock out a benign idle byte */
 }
 
 void spi_write_buf(const uint8_t *buf, uint8_t len)
